@@ -3,7 +3,11 @@ describe('<md-toolbar>', function() {
   var pageScope, element, controller;
   var $rootScope, $timeout;
 
-  beforeEach(module('material.components.toolbar'));
+  beforeEach(function() {
+    module('material.components.toolbar', function($controllerProvider) {
+      $controllerProvider.register('MockController', function() {});
+    });
+  });
   beforeEach(inject(function(_$rootScope_, _$timeout_) {
     $rootScope = _$rootScope_;
     $timeout = _$timeout_;
@@ -45,7 +49,8 @@ describe('<md-toolbar>', function() {
     // Manually link so we can give our own elements with spies on them
     mdToolbarDirective[0].link($rootScope, toolbar, {
       mdScrollShrink: true,
-      mdShrinkSpeedFactor: 1
+      mdShrinkSpeedFactor: 1,
+      $observe: function() {}
     });
 
     $rootScope.$apply();
@@ -103,13 +108,38 @@ describe('<md-toolbar>', function() {
     // It starts out undefined
     expect(element.find('md-content').attr('scroll-shrink')).toEqual(undefined);
 
-    // Change the ng-if to add the toolbar
+    // Change the ng-if to add the toolbar which then injects a scrollShrink
+    // on the mdContent
     pageScope.$apply('shouldShowToolbar = true');
     expect(element.find('md-content').attr('scroll-shrink')).toEqual('true');
 
     // Change the ng-if to remove the toolbar
     pageScope.$apply('shouldShowToolbar = false');
-    expect(element.find('md-content').attr('scroll-shrink')).toEqual('false');
+    expect(element.find('md-toolbar').length).toBe(0);
+  }));
+
+  // The toolbar is like a container component, so we want to make sure it works with ng-controller
+  it('works with ng-controller', inject(function($exceptionHandler) {
+    build(
+      '<div>' +
+      '  <md-toolbar md-scroll-shrink ng-controller="MockController"></md-toolbar>' +
+      '  <md-content></md-content>' +
+      '</div>'
+    );
+
+    // Expect no errors
+    expect($exceptionHandler.errors).toEqual([]);
+  }));
+
+  it('disables scroll shrink when the attribute is not provided', inject(function() {
+    build(
+      '<div>' +
+      '  <md-toolbar></md-toolbar>' +
+      '  <md-content></md-content>' +
+      '</div>'
+    );
+
+    expect(element.find('md-content').attr('scroll-shrink')).toEqual(undefined);
   }));
 
   it('enables scroll shrink when the attribute has no value', function() {
@@ -123,30 +153,37 @@ describe('<md-toolbar>', function() {
     expect(element.find('md-content').attr('scroll-shrink')).toEqual('true');
   });
 
-  it('watches the value of scroll shrink', function() {
+  it('disables scroll shrink if the expression evaluates to false', function() {
+    var pageScope = $rootScope.$new();
+
+    // Set the value to false
+    pageScope.$apply('someValue = false');
+
+    // Build the element
     build(
+      // Pass our template
       '<div>' +
-      '  <md-toolbar md-scroll-shrink="shouldShrink"></md-toolbar>' +
+      '  <md-toolbar md-scroll-shrink="someValue"></md-toolbar>' +
       '  <md-content></md-content>' +
-      '</div>'
+      '</div>',
+
+      // Pass our custom pageScope
+      pageScope
     );
 
-    // It starts out undefined which SHOULD add the scroll shrink because it acts as if no value
-    // was specified
-    expect(element.find('md-content').attr('scroll-shrink')).toEqual('true');
-
-    // Change the scrollShink to false
-    pageScope.$apply('shouldShrink = false');
+    // Check that scroll shrink is disabled
     expect(element.find('md-content').attr('scroll-shrink')).toEqual('false');
-
-    // Change the scrollShink to true
-    pageScope.$apply('shouldShrink = true');
-    expect(element.find('md-content').attr('scroll-shrink')).toEqual('true');
   });
 
-  function build(template) {
+
+  function build(template, scope) {
     inject(function($compile) {
-      pageScope = $rootScope.$new();
+      if (scope) {
+        pageScope = scope
+      } else {
+        pageScope = $rootScope.$new();
+      }
+
       element = $compile(template)(pageScope);
       controller = element.controller('mdToolbar');
 
