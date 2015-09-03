@@ -1,3 +1,7 @@
+# Minor Angular Material Design Improvements
+#### md-autocomplete
+* Will now update results on promise notify while still showing loading
+* Won't add to cache when cache is disabled
 # Material Design for AngularJS Apps [![Build Status](https://travis-ci.org/angular/material.svg)](https://travis-ci.org/angular/material)
 
 [Material Design](https://www.google.com/design/spec/material-design/) is a specification for a

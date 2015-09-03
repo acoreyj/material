@@ -525,13 +525,24 @@ function MdAutocompleteCtrl ($scope, $element, $mdUtil, $mdConstant, $mdTheming,
     } else if (items) {
       $mdUtil.nextTick(function () {
         ctrl.loading = true;
-        if (items.success) items.success(handleResults);
-        if (items.then)    items.then(handleResults);
+        if (items.success) items.success(handleResults, null, handleNotify);
+        if (items.then)    items.then(handleResults, null, handleNotify);
         if (items.finally) items.finally(function () { ctrl.loading = false; });
       });
     }
+
+    function handleNotify (matches) {
+      if (searchText !== $scope.searchText) return; //-- old request
+      ctrl.matches = matches;
+      ctrl.hidden  = shouldHide();
+      updateMessages();
+      positionDropdown();
+    }
+
     function handleResults (matches) {
-      cache[ term ] = matches;
+      if (!$scope.noCache) {
+        cache[ term ] = matches;
+      }
       if (searchText !== $scope.searchText) return; //-- just cache the results if old request
       ctrl.matches = matches;
       ctrl.hidden  = shouldHide();

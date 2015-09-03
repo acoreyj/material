@@ -1,0 +1,21 @@
+{
+  "name": "cj-angular-material",
+  "version": "0.11.0-rc1-master-ffbcff3",
+  "ignore": ['/*',
+            '!/dist',
+            '!bower.json',
+            '!LICENCE',
+            '!package.json',
+            '!README.md',
+            '!CHANGELOG.md',
+            '!index.js'],
+  "dependencies": {
+    "angular": "^1.3.0 || >1.4.0-beta.0",
+    "angular-animate": "^1.3.0 || >1.4.0-beta.0",
+    "angular-aria": "^1.3.15 || >1.4.0-beta.0"
+  },
+  "main": [
+    "dist/angular-material.js",
+    "dist/angular-material.css"
+  ]
+}
