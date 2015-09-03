@@ -20,3 +20,7 @@ md-progress-circular {
 #loaders > h5 {
     padding-top: 8px;
 }
+
+#loaders > p {
+    margin-right: 20px;
+}

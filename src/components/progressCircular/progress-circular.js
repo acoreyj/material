@@ -101,7 +101,7 @@ function MdProgressCircularDirective($mdConstant, $mdTheming, $mdUtil) {
       var percentValue = clamp(value);
       element.attr('aria-valuenow', percentValue);
 
-      if (attr.mdMode == "determinate") {
+      if (mode() == MODE_DETERMINATE) {
         animateIndicator(percentValue);
       }
     });
@@ -122,6 +122,11 @@ function MdProgressCircularDirective($mdConstant, $mdTheming, $mdUtil) {
           break;
         default:
           spinnerWrapper.addClass('ng-hide');
+          if ( lastMode ) {
+            spinnerWrapper.removeClass( lastMode );
+            lastMode = undefined;
+          }
+          break;
       }
     });
 
@@ -136,6 +141,8 @@ function MdProgressCircularDirective($mdConstant, $mdTheming, $mdUtil) {
      * - use attribute selectors which had poor performances in IE
      */
     function animateIndicator(value) {
+      if ( !mode() ) return;
+
       leftC  = leftC  || angular.element(element[0].querySelector('.md-left > .md-half-circle'));
       rightC = rightC || angular.element(element[0].querySelector('.md-right > .md-half-circle'));
       gap    = gap    || angular.element(element[0].querySelector('.md-gap'));
@@ -174,6 +181,25 @@ function MdProgressCircularDirective($mdConstant, $mdTheming, $mdUtil) {
       // should return ratio; DEFAULT_PROGRESS_SIZE === 100px is default size
       return  (value > 1) ? value / DEFAULT_PROGRESS_SIZE : value;
     }
+
+    /**
+     * Is the md-mode a valid option?
+     */
+    function mode() {
+      var value = attr.mdMode;
+      if ( value ) {
+        switch(value) {
+          case MODE_DETERMINATE :
+          case MODE_INDETERMINATE :
+            break;
+          default:
+            value = undefined;
+            break;
+        }
+      }
+      return value;
+    }
+
   }
 
   /**
