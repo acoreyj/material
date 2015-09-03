@@ -1,6 +1,6 @@
 {
-  "name": "cj-angular-material",
-  "version": "0.11.0-rc1-master-ffbcff3",
+  "name": "angular-material-cj",
+  "version": "0.11.0-rc1-master-ffbcff3-cj",
   "ignore": ['/*',
             '!/dist',
             '!bower.json',
