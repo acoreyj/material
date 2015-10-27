@@ -111,6 +111,20 @@ describe('mdListItem directive', function() {
     expect(firstChild.childNodes[0].childNodes[0].nodeName).toBe('P');
   });
 
+  it('creates buttons when used with ui-sref', function() {
+    var listItem = setup('<md-list-item ui-sref="somestate"><p>Hello world</p></md-list-item>');
+    var firstChild = listItem.children()[0];
+    expect(firstChild.nodeName).toBe('MD-BUTTON');
+    expect(firstChild.hasAttribute('ui-sref')).toBeTruthy();
+  });
+
+  it('creates buttons when used with href', function() {
+    var listItem = setup('<md-list-item href="/somewhere"><p>Hello world</p></md-list-item>');
+    var firstChild = listItem.children()[0];
+    expect(firstChild.nodeName).toBe('MD-BUTTON');
+    expect(firstChild.hasAttribute('href')).toBeTruthy();
+  });
+
   it('moves aria-label to primary action', function() {
     var listItem = setup('<md-list-item ng-click="sayHello()" aria-label="Hello"></md-list-item>');
     var listItemChildren = listItem.children();
@@ -130,6 +144,17 @@ describe('mdListItem directive', function() {
   it('should detect non-compiled md-buttons', function() {
     var listItem = setup('<md-list-item><md-button ng-click="sayHello()">Hello</md-button></md-list-item>');
     expect(listItem.hasClass('md-no-proxy')).toBeFalsy();
+  });
+
+  it('should not detect secondary or excluded md-buttons', function() {
+    var listItem = setup(
+      '<md-list-item>' +
+      '  <div>Content Here</div>' +
+      '  <md-button class="md-secondary" ng-click="sayHello()">Hello</md-button>' +
+      '  <md-button class="md-exclude" ng-click="sayHello()">Hello</md-button>' +
+      '</md-list-item>'
+    );
+    expect(listItem.hasClass('md-no-proxy')).toBeTruthy();
   });
 
 });

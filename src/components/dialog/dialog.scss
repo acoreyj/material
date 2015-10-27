@@ -36,7 +36,7 @@ md-dialog {
   position: relative;
   overflow: auto; // stop content from leaking out of dialog parent and fix IE
 
-  box-shadow: $whiteframe-shadow-z5;
+  box-shadow: $whiteframe-shadow-13dp;
 
   display: flex;
   flex-direction: column;
@@ -46,10 +46,14 @@ md-dialog {
     flex-direction: column;
     overflow: auto;
   }
+
+  .md-dialog-content {
+    padding: $dialog-padding;
+  }
+
   md-dialog-content {
     order: 1;
     flex-direction: column;
-    padding: $dialog-padding;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 

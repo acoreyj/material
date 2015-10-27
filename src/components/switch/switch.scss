@@ -81,7 +81,7 @@ md-switch {
     height: $switch-thumb-size;
     width: $switch-thumb-size;
     border-radius: 50%;
-    box-shadow: $whiteframe-shadow-z1;
+    box-shadow: $whiteframe-shadow-1dp;
 
     &:before {
       background-color: transparent;
@@ -114,7 +114,7 @@ md-switch {
     .md-bar,
     .md-thumb-container,
     .md-thumb {
-      transition: $swift-ease-in-out;
+      transition: $swift-linear;
       transition-property: transform, background-color;
     }
     .md-bar,

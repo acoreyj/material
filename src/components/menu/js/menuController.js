@@ -70,7 +70,7 @@ function MenuController($mdMenu, $attrs, $element, $scope, $mdUtil, $timeout) {
           nestedMenu.open();
         }
       }, nestedMenu ? 100 : 250);
-      var focusableTarget = event.currentTarget.querySelector('[tabindex]');
+      var focusableTarget = event.currentTarget.querySelector('button:not([disabled])');
       focusableTarget && focusableTarget.focus();
     });
     menuItems.on('mouseleave', function(event) {
@@ -100,7 +100,7 @@ function MenuController($mdMenu, $attrs, $element, $scope, $mdUtil, $timeout) {
       preserveElement: self.isInMenuBar || self.nestedMenus.length > 0,
       parent: self.isInMenuBar ? $element : 'body'
     });
-  }
+  };
 
   // Expose a open function to the child scope for html to use
   $scope.$mdOpenMenu = this.open;
@@ -133,19 +133,25 @@ function MenuController($mdMenu, $attrs, $element, $scope, $mdUtil, $timeout) {
     this.containerProxy && this.containerProxy(ev);
   };
 
+  this.destroy = function() {
+    return $mdMenu.destroy();
+  };
+
   // Use the $mdMenu interim element service to close the menu contents
   this.close = function closeMenu(skipFocus, closeOpts) {
     if ( !self.isOpen ) return;
     self.isOpen = false;
 
-    $scope.$emit('$mdMenuClose', $element);
+    var eventDetails = angular.extend({}, closeOpts, { skipFocus: skipFocus });
+    $scope.$emit('$mdMenuClose', $element, eventDetails);
     $mdMenu.hide(null, closeOpts);
+
     if (!skipFocus) {
       var el = self.restoreFocusTo || $element.find('button')[0];
       if (el instanceof angular.element) el = el[0];
-      el.focus();
+      if (el) el.focus();
     }
-  }
+  };
 
   /**
    * Build a nice object out of our string attribute which specifies the

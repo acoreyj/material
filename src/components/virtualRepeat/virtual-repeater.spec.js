@@ -21,11 +21,12 @@ describe('<md-virtual-repeat>', function() {
       HORIZONTAL_PX = 150,
       ITEM_SIZE = 10;
 
-  beforeEach(inject(function(_$$rAF_, _$compile_, _$document_, $rootScope) {
+  beforeEach(inject(function(_$$rAF_, _$compile_, _$document_, $rootScope, _$material_) {
     repeater = angular.element(REPEATER_HTML);
     container = angular.element(CONTAINER_HTML).append(repeater);
     component = null;
     $$rAF = _$$rAF_;
+    $material = _$material_;
     $compile = _$compile_;
     $document = _$document_;
     scope = $rootScope.$new();
@@ -49,6 +50,8 @@ describe('<md-virtual-repeat>', function() {
     scroller  = angular.element(component[0].querySelector('.md-virtual-repeat-scroller'));
     sizer     = angular.element(component[0].querySelector('.md-virtual-repeat-sizer'));
     offsetter = angular.element(component[0].querySelector('.md-virtual-repeat-offsetter'));
+
+    $material.flushOutstandingAnimations();
 
     return component;
   }
@@ -96,9 +99,7 @@ describe('<md-virtual-repeat>', function() {
     repeater.removeAttr('md-item-size');
     createRepeater();
     scope.items = createItems(NUM_ITEMS);
-    scope.$apply();
-    $$rAF.flush();
-    $$rAF.flush();
+    $material.flushInterimElement();
 
     var numItemRenderers = VERTICAL_PX / ITEM_SIZE + VirtualRepeatController.NUM_EXTRA;
 
@@ -405,6 +406,118 @@ describe('<md-virtual-repeat>', function() {
 
     var numItemRenderers = VERTICAL_PX / ITEM_SIZE + VirtualRepeatController.NUM_EXTRA;
     expect(getRepeated().length).toBe(numItemRenderers);
+  });
+
+  it('should resize the scroller correctly when item length changes (vertical)', function() {
+    scope.items = createItems(200);
+    createRepeater();
+    scope.$apply();
+    $$rAF.flush();
+    expect(sizer[0].offsetHeight).toBe(200 * ITEM_SIZE);
+
+    // Scroll down half way
+    scroller[0].scrollTop = 100 * ITEM_SIZE;
+    scroller.triggerHandler('scroll');
+    scope.$apply();
+    $$rAF.flush();
+
+    // Remove some items
+    scope.items = createItems(20);
+    scope.$apply();
+    $$rAF.flush();
+    expect(scroller[0].scrollTop).toBe(0);
+    expect(sizer[0].offsetHeight).toBe(20 * ITEM_SIZE);
+
+    // Scroll down half way
+    scroller[0].scrollTop = 10 * ITEM_SIZE;
+    scroller.triggerHandler('scroll');
+    scope.$apply();
+    $$rAF.flush();
+
+    // Add more items
+    scope.items = createItems(250);
+    scope.$apply();
+    $$rAF.flush();
+    expect(scroller[0].scrollTop).toBe(100);
+    expect(sizer[0].offsetHeight).toBe(250 * ITEM_SIZE);
+  });
+
+  it('should resize the scroller correctly when item length changes (horizontal)', function() {
+    container.attr({'md-orient-horizontal': ''});
+    scope.items = createItems(200);
+    createRepeater();
+    scope.$apply();
+    $$rAF.flush();
+    expect(sizer[0].offsetWidth).toBe(200 * ITEM_SIZE);
+
+    // Scroll right half way
+    scroller[0].scrollLeft = 100 * ITEM_SIZE;
+    scroller.triggerHandler('scroll');
+    scope.$apply();
+    $$rAF.flush();
+
+    // Remove some items
+    scope.items = createItems(20);
+    scope.$apply();
+    $$rAF.flush();
+    expect(scroller[0].scrollLeft).toBe(0);
+    expect(sizer[0].offsetWidth).toBe(20 * ITEM_SIZE);
+
+    // Scroll right half way
+    scroller[0].scrollLeft = 10 * ITEM_SIZE;
+    scroller.triggerHandler('scroll');
+    scope.$apply();
+    $$rAF.flush();
+
+    // Add more items
+    scope.items = createItems(250);
+    scope.$apply();
+    $$rAF.flush();
+    expect(sizer[0].offsetWidth).toBe(250 * ITEM_SIZE);
+  });
+
+  it('should update topIndex when scrolling', function() {
+    container.attr({'md-top-index': 'topIndex'});
+    scope.items = createItems(NUM_ITEMS);
+    createRepeater();
+
+    scope.$apply();
+    expect(scope.topIndex).toBe(0);
+
+    scroller[0].scrollTop = ITEM_SIZE * 50;
+    scroller.triggerHandler('scroll');
+    scope.$apply();
+    expect(scope.topIndex).toBe(50);
+
+    scroller[0].scrollTop = 25 * ITEM_SIZE;
+    scroller.triggerHandler('scroll');
+    scope.$apply();
+    expect(scope.topIndex).toBe(25);
+  });
+
+  it('should start at the given topIndex position', function() {
+    container.attr({'md-top-index': 'topIndex'});
+    repeater.removeAttr('md-start-index');
+    scope.topIndex = 10;
+    scope.items = createItems(200);
+    createRepeater();
+    scope.$apply();
+
+    expect(scroller[0].scrollTop).toBe(10 * ITEM_SIZE);
+  });
+
+  it('should scroll when topIndex is updated', function() {
+    container.attr({'md-top-index': 'topIndex'});
+    scope.items = createItems(200);
+    createRepeater();
+
+    scope.topIndex = 50;
+    scope.$apply();
+    expect(scroller[0].scrollTop).toBe(50 * ITEM_SIZE);
+
+    scope.topIndex = 25;
+    scope.$apply();
+    expect(scroller[0].scrollTop).toBe(25 * ITEM_SIZE);
   });
 
   /**

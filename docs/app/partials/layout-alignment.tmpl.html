@@ -1,4 +1,4 @@
-<div ng-controller="LayoutCtrl" class="layout-content">
+<div ng-controller="LayoutCtrl" class="layout-content" ng-cloak>
 
   <p>
     The <code>layout-align</code> attribute takes two words.
@@ -7,7 +7,7 @@
     <p>Only one word is required for the attribute. For example, <code>layout="row" layout-align="center"</code> would make the elements center horizontally and use the default behavior vertically.</p>
 
     <p><code>layout="column" layout-align="center end"</code> would make
-    children align along the center vertically and along the end (right) horizontally.</p>
+    children align along the center vertically and along the end (right) horizontally. </p>
   <table class="md-api-table">
     <tr>
       <td>layout-align</td>
@@ -44,7 +44,8 @@
 
   <section class="layout-panel-parent">
     <div ng-panel="layoutDemo">
-      <docs-demo demo-title='layout="{{layoutDemo.direction}}" layout-align="{{layoutAlign()}}"' class="small-demo" interpolate-code="true">
+      <docs-demo demo-title='layout="{{layoutDemo.direction}}" layout-align="{{layoutAlign()}}"'
+                 class="small-demo colorNested" interpolate-code="true">
         <demo-file name="index.html">
           <div layout="{{layoutDemo.direction}}" layout-align="{{layoutAlign()}}">
             <div>one</div>

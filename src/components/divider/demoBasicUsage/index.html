@@ -1,4 +1,4 @@
-<div ng-controller="AppCtrl">
+<div ng-controller="AppCtrl" ng-cloak>
 
   <md-toolbar class="md-theme-light">
     <h2 class="md-toolbar-tools">
@@ -14,6 +14,7 @@
           <h4>{{item.who}}</h4>
           <p>{{item.notes}}</p>
         </div>
+        <md-button class="md-secondary">Respond</md-button>
         <md-divider ng-if="!$last"></md-divider>
       </md-list-item>
     </md-list>

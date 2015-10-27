@@ -6,7 +6,8 @@
   // Provides a service to open a code example in codepen.
   function Codepen($demoAngularScripts, $document, codepenDataAdapter) {
 
-    var CODEPEN_API = 'https://codepen.io/pen/define/';
+    // The following URL must be HTTP and not HTTPS to allow us to do localhost testing
+    var CODEPEN_API = 'http://codepen.io/pen/define/';
 
     return {
       editOnCodepen: editOnCodepen
@@ -48,8 +49,13 @@
   // additional fields not used by this service. http://blog.codepen.io/documentation/api/prefill
   function CodepenDataAdapter() {
 
-    var CORE_JS = 'http://localhost:8080/angular-material.js';
+    // The following URL's need to use `localhost` as these values get replaced during release
+    var CORE_JS  = 'http://localhost:8080/angular-material.js';
     var CORE_CSS = 'http://localhost:8080/angular-material.css';
+    var DOC_CSS  = 'http://localhost:8080/docs.css';              // CSS overrides for custom docs
+
+    var LINK_FONTS_ROBOTO = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">';
+
     var ASSET_CACHE_JS = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-114/assets-cache.js';
 
     return {
@@ -64,14 +70,17 @@
       return {
         title: demo.title,
         html: processHtml(demo),
-        css: mergeFiles(files.css).join(' '),
+        head: LINK_FONTS_ROBOTO,
+
         js: processJs(files.js),
+        css: mergeFiles( files.css ).join(' '),
+
         js_external: externalScripts.concat([CORE_JS, ASSET_CACHE_JS]).join(';'),
-        css_external: CORE_CSS
+        css_external: [CORE_CSS, DOC_CSS].join(';')
       };
     }
 
-    // Modifies index.html with neccesary changes in order to display correctly in codepen
+    // Modifies index.html with necessary changes in order to display correctly in codepen
     // See each processor to determine how each modifies the html
     function processHtml(demo) {
       var index = demo.files.index.contents;
@@ -79,7 +88,6 @@
       var processors = [
         applyAngularAttributesToParentElement,
         insertTemplatesAsScriptTags,
-        htmlEscapeAmpersand,
         htmlEscapeAmpersand
       ];
 
@@ -113,7 +121,7 @@
 
       // Grab only the DIV for the demo...
       angular.forEach(angular.element(html), function(it,key){
-        if ((it.nodeName != "SCRIPT") || (it.nodeName != "#text")) {
+        if ((it.nodeName != "SCRIPT") && (it.nodeName != "#text")) {
           tmp = angular.element(it);
         }
       });

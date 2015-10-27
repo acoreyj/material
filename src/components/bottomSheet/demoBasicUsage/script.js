@@ -22,7 +22,7 @@ angular.module('bottomSheetDemo1', ['ngMaterial'])
       controller: 'ListBottomSheetCtrl',
       targetEvent: $event
     }).then(function(clickedItem) {
-      $scope.alert = clickedItem.name + ' clicked!';
+      $scope.alert = clickedItem['name'] + ' clicked!';
     });
   };
 
@@ -31,11 +31,12 @@ angular.module('bottomSheetDemo1', ['ngMaterial'])
     $mdBottomSheet.show({
       templateUrl: 'bottom-sheet-grid-template.html',
       controller: 'GridBottomSheetCtrl',
+      clickOutsideToClose: false,
       targetEvent: $event
     }).then(function(clickedItem) {
       $mdToast.show(
             $mdToast.simple()
-              .content(clickedItem.name + ' clicked!')
+              .content(clickedItem['name'] + ' clicked!')
               .position('top right')
               .hideDelay(1500)
           );

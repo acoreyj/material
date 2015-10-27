@@ -1,5 +1,5 @@
 $card-padding: 16px !default;
-$card-box-shadow: $whiteframe-shadow-z1 !default;
+$card-box-shadow: $whiteframe-shadow-1dp !default;
 
 md-card {
   box-sizing: border-box;
@@ -11,12 +11,17 @@ md-card {
 
   > img,
   > :not(md-card-content) img {
+    display: flex;
+    flex: 0 0 auto;
     width: 100%;
+    height: auto;
   }
 
   md-card-content {
+    display: block;
     padding: $card-padding;
   }
+
   .md-actions {
     margin: 0;
 
@@ -28,6 +33,7 @@ md-card {
     }
   }
   md-card-footer {
+    margin-top: auto;
     padding: $card-padding;
   }
 }

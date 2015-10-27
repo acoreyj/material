@@ -1,5 +1,5 @@
 
-<div ng-controller="AppCtrl" layout="column" style="height:500px;">
+<div ng-controller="AppCtrl" layout="column" style="height:500px;" ng-cloak>
 
   <section layout="row" flex>
 
@@ -39,6 +39,7 @@
 
         <div>
           <md-button ng-click="toggleRight()"
+            ng-hide="isOpenRight()"
             class="md-primary">
             Toggle right
           </md-button>
