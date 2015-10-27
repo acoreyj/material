@@ -1,7 +1,7 @@
 Package.describe({
   name: 'jepperct:angular-material-cj',
   summary: ' A package to add Custom Material Design by CJ to Angular ',
-  version: '0.11.0_5',
+  version: '1.0.0',
   git: 'https://github.com/acoreyj/material'
 });
 
