@@ -215,9 +215,9 @@ code:not(.highlight) {
 .site-sidenav,
 .site-sidenav.md-locked-open-add-active,
 .site-sidenav.md-locked-open {
-  width: 256px;
-  min-width: 256px;
-  max-width: 256px;
+  width:     272px;
+  min-width: 272px;
+  max-width: 272px;
 }
 .site-sidenav > * {
   min-width: 218px;
@@ -873,4 +873,13 @@ table.attributes  tr  td:last-child {
 
 table.md-api-table  tr  td:first-child {
   font-weight: bold;
+}
+
+
+.layout_note {
+  font-size: 0.9em;
+    margin: -5px 40px 0px 20px;
+    color: rgb(1, 57, 114);
+    background-color: rgba(156, 204, 101,0.4);
+    padding: 20px;
 }

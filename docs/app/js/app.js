@@ -22,7 +22,7 @@ function(SERVICES, COMPONENTS, DEMOS, PAGES,
       }
     })
     .when('/layout/', {
-      redirectTo:  '/layout/container'
+      redirectTo:  '/layout/introduction'
     })
     .when('/demo/', {
       redirectTo: DEMOS[0].url
@@ -207,6 +207,11 @@ function(SERVICES, COMPONENTS, DEMOS, PAGES, $location, $rootScope, $http, $wind
             name: 'Multiple Themes',
             url: 'Theming/04_multiple_themes',
             type: 'link'
+          },
+          {
+            name: 'Under the Hood',
+            url: 'Theming/05_under_the_hood',
+            type: 'link'
           }
         ]
       }
@@ -243,21 +248,34 @@ function(SERVICES, COMPONENTS, DEMOS, PAGES, $location, $rootScope, $http, $wind
       name: 'Layout',
       type: 'toggle',
       pages: [{
-        name: 'Container Elements',
+        name: 'Introduction',
+        id: 'layoutIntro',
+        url: 'layout/introduction'
+      }
+        ,{
+        name: 'Layout Containers',
         id: 'layoutContainers',
         url: 'layout/container'
-      },{
-        name: 'Grid System',
+        }
+      ,{
+        name: 'Layout Children',
         id: 'layoutGrid',
-        url: 'layout/grid'
-      },{
+        url: 'layout/children'
+      }
+      ,{
         name: 'Child Alignment',
         id: 'layoutAlign',
         url: 'layout/alignment'
-      },{
-        name: 'Options',
+      }
+      ,{
+        name: 'Extra Options',
         id: 'layoutOptions',
         url: 'layout/options'
+      }
+      ,{
+        name: 'Troubleshooting',
+        id: 'layoutTips',
+        url: 'layout/tips'
       }]
     },
     {
@@ -628,7 +646,26 @@ function($scope, $attrs, $location, $rootScope) {
     direction: 'row'
   };
   $scope.layoutAlign = function() {
-    return $scope.layoutDemo.mainAxis + ' ' + $scope.layoutDemo.crossAxis;
+    return $scope.layoutDemo.mainAxis +
+     ($scope.layoutDemo.crossAxis ? ' ' + $scope.layoutDemo.crossAxis : '')
+  };
+}])
+
+.controller('LayoutTipsCtrl', [
+function() {
+  var self = this;
+
+  /*
+   * Flex Sizing - Odd
+   */
+  self.toggleButtonText = "Hide";
+
+  self.toggleContentSize = function() {
+    var contentEl = angular.element(document.getElementById('toHide'));
+
+    contentEl.toggleClass("ng-hide");
+
+    self.toggleButtonText = contentEl.hasClass("ng-hide") ? "Show" : "Hide";
   };
 }])
 

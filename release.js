@@ -266,7 +266,8 @@
     exec([
            'rm -rf dist',
            'gulp docs',
-           'sed -i \'\' \'s,http:\\/\\/localhost:8080\\/angular-material,https:\\/\\/gitcdn.xyz/repo/angular/bower-material/v{{newVersion}}/angular-material,g\' dist/docs/docs.js',
+           'sed -i \'\' \'s,http:\\/\\/localhost:8080\\/angular-material,https:\\/\\/cdn.gitcdn.xyz/cdn/angular/bower-material/v{{newVersion}}/angular-material,g\' dist/docs/docs.js',
+           'sed -i \'\' \'s,http:\\/\\/localhost:8080\\/docs\\.css,https:\\/\\/material.angularjs.org/{{newVersion}}/docs.css,g\' dist/docs/docs.js',
            'sed -i \'\' \'s,base\ href=\\",base\ href=\\"/{{newVersion}},g\' dist/docs/index.html'
          ]);
 
@@ -274,7 +275,7 @@
     exec([
            'rm -rf ./*-rc*',
            'cp -Rf ../dist/docs {{newVersion}}',
-           ( newVersion.indexOf('rc') < 0 ? 'rm -rf latest && cp -Rf ../dist/docs latest' : '# skipped latest because this is a release candidate' ),
+           'rm -rf latest && cp -Rf ../dist/docs latest',
            'git add -A',
            'git commit -m "release: version {{newVersion}}"',
            'rm -rf ../dist'
@@ -289,7 +290,7 @@
     pushCmds.push(
         comment('push the site'),
         'cd ' + options.cwd,
-        'git pull --rebase',
+        'git pull --rebase --strategy=ours',
         'git push',
         'cd ..'
     );
@@ -325,7 +326,7 @@
       config.versions.unshift(newVersion);
 
       //-- only set to default if not a release candidate
-      if (newVersion.indexOf('rc') < 0) config.latest = newVersion;
+      config.latest = newVersion;
       fs.writeFileSync(options.cwd + '/docs.json', JSON.stringify(config, null, 2));
     }
   }

@@ -13,10 +13,7 @@ material design specification for use in Angular single-page applications (SPAs)
 
 ![venn diagram](https://cloud.githubusercontent.com/assets/210413/5077572/30dfc2f0-6e6a-11e4-9723-07c918128f4f.png)
 
-This project is in early pre-release. Angular Material is both a reference implementation of
-Material Design and a complementary effort to the [Polymer](https://www.polymer-project.org/)
-project's [Paper Elements](https://www.polymer-project.org/docs/elements/paper-elements.html)
-collection.
+For developers using AngularJS, Angular Material is the reference implementation of Google's Material Design Specification. This project implements version 1.x of Angular Material and includes a rich set of reusable, well-tested, and accessible UI components.
 
 Quick Links:
 
@@ -164,5 +161,11 @@ pull directly from the distribution GitHub
     <script src="https://gitcdn.xyz/repo/angular/bower-material/master/angular-material.js"></script>
 
   </body>
+```
+
+Once you have all the necessary assets installed, add `ngMaterial` as a dependency for your app:
+
+```javascript
+angular.module('myApp', ['ngMaterial']);
 ```
 

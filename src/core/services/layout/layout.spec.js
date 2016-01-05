@@ -1,5 +1,5 @@
 describe('layout directives', function() {
-  var suffixes = ['sm', 'gt-sm', 'md', 'gt-md', 'lg', 'gt-lg'],
+  var suffixes = ['xs', 'gt-xs', 'sm', 'gt-sm', 'md', 'gt-md', 'lg', 'gt-lg', 'xl'],
     $mdUtil, $compile, pageScope;
 
   beforeEach(module('material.core', 'material.core.layout'));
@@ -20,8 +20,10 @@ describe('layout directives', function() {
 
     it('should ignore invalid values', function() {
       var element = $compile('<div layout="humpty">Layout</div>')(pageScope);
-      expect(element.hasClass("layout-row")).toBeTruthy();
+
+      expect( element.attr('layout') ).toBe('humpty');        // original attribute value unmodified
       expect(element.hasClass('layout-humpty')).toBeFalsy();
+      expect(element.hasClass("layout-row")).toBeTruthy();    // injected className based on fallback value
     });
 
     it('should support interpolated values layout-gt-sm="{{direction}}"', function() {
@@ -36,6 +38,7 @@ describe('layout directives', function() {
       pageScope.$apply('direction = "column"');
       expect(element.hasClass('layout-gt-sm-column')).toBeTruthy();
     });
+
 
     /**
      * For all breakpoints,
@@ -176,18 +179,18 @@ describe('layout directives', function() {
   describe('using [layout-align] attributes', function() {
     var attrName = "layout-align";
     var alignmentValues = [
-      "center", "center center", "center start", "center end",
-      "end", "end center", "end start", "end end",
-      "space-around", "space-around center", "space-around start", "space-around end",
-      "space-between", "space-between center", "space-between start", "space-between end",
-      "start center", "start start", "start end"
+      "start start", "start center", "start end",
+      "center stretch", "center start", "center center", "center end",
+      "end stretch", "end center", "end start", "end end",
+      "space-around stretch", "space-around start", "space-around center", "space-around end",
+      "space-between stretch", "space-between start", "space-between center", "space-between end"
     ];
 
     it('should support attribute without value "<div layout-align>"', function() {
       var markup = $mdUtil.supplant('<div {0}>Layout</div>', [attrName]);
       var element = $compile(markup)(pageScope);
 
-      expect(element.hasClass(attrName + "-start-start")).toBeTruthy();
+      expect(element.hasClass(attrName + "-start-stretch")).toBeTruthy();
       expect(element.hasClass(attrName)).toBeFalsy();
     });
 
@@ -195,7 +198,7 @@ describe('layout directives', function() {
       var markup = $mdUtil.supplant('<div {0}="humpty">Layout</div>', [attrName]);
       var element = $compile(markup)(pageScope);
 
-      expect(element.hasClass(attrName + "-start-start")).toBeTruthy();
+      expect(element.hasClass(attrName + "-start-stretch")).toBeTruthy();
       expect(element.hasClass(attrName + '-humpty')).toBeFalsy();
     });
 
@@ -278,7 +281,9 @@ describe('layout directives', function() {
       var markup = $mdUtil.supplant('<div {0}="{1}">Layout</div>', [className, value]);
 
       var element = $compile(markup)(pageScope);
-      expect(element.hasClass(expected)).toBeTruthy();
+      if ( !element.hasClass(expected) ) {
+        expect(expected).toBe(element[0].classList[1]);
+      }
 
       if (raw) {
         // Is the raw value also present?

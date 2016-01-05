@@ -8,13 +8,14 @@ var BOUND_MENU_METHODS = ['handleKeyDown', 'handleMenuHover', 'scheduleOpenHover
 /**
  * @ngInject
  */
-function MenuBarController($scope, $element, $attrs, $mdConstant, $document, $mdUtil, $timeout) {
+function MenuBarController($scope, $rootScope, $element, $attrs, $mdConstant, $document, $mdUtil, $timeout) {
   this.$element = $element;
   this.$attrs = $attrs;
   this.$mdConstant = $mdConstant;
   this.$mdUtil = $mdUtil;
   this.$document = $document;
   this.$scope = $scope;
+  this.$rootScope = $rootScope;
   this.$timeout = $timeout;
 
   var self = this;
@@ -29,10 +30,11 @@ MenuBarController.prototype.init = function() {
   var $scope = this.$scope;
 
   var self = this;
+  var deregisterFns = [];
   $element.on('keydown', this.handleKeyDown);
   this.parentToolbar = $mdUtil.getClosest($element, 'MD-TOOLBAR');
 
-  $scope.$on('$mdMenuOpen', function(event, el) {
+  deregisterFns.push(this.$rootScope.$on('$mdMenuOpen', function(event, el) {
     if (self.getMenus().indexOf(el[0]) != -1) {
       $element[0].classList.add('md-open');
       el[0].classList.add('md-open');
@@ -40,34 +42,35 @@ MenuBarController.prototype.init = function() {
       self.currentlyOpenMenu.registerContainerProxy(self.handleKeyDown);
       self.enableOpenOnHover();
     }
-  });
+  }));
 
-  $scope.$on('$mdMenuClose', function(event, el, opts) {
+  deregisterFns.push(this.$rootScope.$on('$mdMenuClose', function(event, el, opts) {
     var rootMenus = self.getMenus();
     if (rootMenus.indexOf(el[0]) != -1) {
       $element[0].classList.remove('md-open');
       el[0].classList.remove('md-open');
     }
 
-    if (opts.closeAll) {
-      if ($element[0].contains(el[0])) {
-        var parentMenu = el[0];
-        while (parentMenu && rootMenus.indexOf(parentMenu) == -1) {
-          parentMenu = $mdUtil.getClosest(parentMenu, 'MD-MENU', true);
-        }
-        if (parentMenu) {
-          if (!opts.skipFocus) parentMenu.querySelector('button:not([disabled])').focus();
-          self.currentlyOpenMenu = undefined;
-          self.disableOpenOnHover();
-          self.setKeyboardMode(true);
-        }
+    if ($element[0].contains(el[0])) {
+      var parentMenu = el[0];
+      while (parentMenu && rootMenus.indexOf(parentMenu) == -1) {
+        parentMenu = $mdUtil.getClosest(parentMenu, 'MD-MENU', true);
       }
+      if (parentMenu) {
+        if (!opts.skipFocus) parentMenu.querySelector('button:not([disabled])').focus();
+        self.currentlyOpenMenu = undefined;
+        self.disableOpenOnHover();
+        self.setKeyboardMode(true);
+      }
+    }
+  }));
+
+  $scope.$on('$destroy', function() {
+    while (deregisterFns.length) {
+      deregisterFns.shift()();
     }
   });
 
-  angular
-    .element(this.getMenus())
-    .on('mouseenter', this.handleMenuHover);
 
   this.setKeyboardMode(true);
 };
@@ -87,6 +90,9 @@ MenuBarController.prototype.enableOpenOnHover = function() {
     parentToolbar.style.position = 'relative';
     parentToolbar.style.zIndex = 100;
   }
+  angular
+    .element(this.getMenus())
+    .on('mouseenter', this.handleMenuHover);
 };
 
 MenuBarController.prototype.handleMenuHover = function(e) {
@@ -104,6 +110,9 @@ MenuBarController.prototype.disableOpenOnHover = function() {
   if (parentToolbar = this.parentToolbar) {
     parentToolbar.setAttribute('style', parentToolbar.dataset.mdRestoreStyle || '');
   }
+  angular
+    .element(this.getMenus())
+    .off('mouseenter', this.handleMenuHover);
 };
 
 MenuBarController.prototype.scheduleOpenHoveredMenu = function(e) {
