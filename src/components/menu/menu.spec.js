@@ -7,7 +7,7 @@ describe('material.components.menu', function() {
     $mdUtil = _$mdUtil_;
     $mdMenu = _$mdMenu_;
     $timeout = _$timeout_;
-    var abandonedMenus = $document[0].querySelectorAll('.md-open-menu-container');
+    var abandonedMenus = $document[0].querySelectorAll('._md-open-menu-container');
     angular.element(abandonedMenus).remove();
   }));
   afterEach(function() {
@@ -95,6 +95,17 @@ describe('material.components.menu', function() {
       closeMenu(menu);
       expect(clickDetected).toBe(false);
     });
+
+    it('should remove the backdrop if container got destroyed', inject(function($document) {
+      var menu = setup();
+      openMenu(menu);
+
+      expect($document.find('md-backdrop').length).not.toBe(0);
+
+      menu.remove();
+
+      expect($document.find('md-backdrop').length).toBe(0);
+    }));
 
     it('closes on backdrop click', inject(function($document) {
 
@@ -217,7 +228,7 @@ describe('material.components.menu', function() {
     var res;
     el = (el instanceof angular.element) ? el[0] : el;
     inject(function($document) {
-      var container = $document[0].querySelector('.md-open-menu-container');
+      var container = $document[0].querySelector('._md-open-menu-container');
       if (container && container.style.display == 'none') {
         res = [];
       } else {

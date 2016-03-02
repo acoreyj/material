@@ -41,7 +41,7 @@ describe('<md-tooltip> directive', function() {
         '</md-button>'
       );
 
-      expect(element.attr('aria-label')).toBeUndefined();
+      expect(element.attr('aria-label')).toBe("Hello");
   });
 
   it('should label parent', function(){
@@ -117,7 +117,7 @@ describe('<md-tooltip> directive', function() {
       showTooltip(true);
 
       expect(findTooltip().length).toBe(1);
-      expect(findTooltip().hasClass('md-show')).toBe(true);
+      expect(findTooltip().hasClass('_md-show')).toBe(true);
 
       showTooltip(false);
 

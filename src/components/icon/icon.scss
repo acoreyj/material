@@ -9,10 +9,11 @@ md-icon {
 
   svg {
     pointer-events: none;
+    display: block;
   }
 
   &[md-font-icon] {
-    line-height: 1;
+    line-height: $icon-size;
     width: auto;
   }
 }

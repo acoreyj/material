@@ -1,39 +1,5 @@
 describe('util', function() {
 
-  describe('validateScope',function() {
-
-    it("should not find a valid scope when debug is disabled", function() {
-      module(function($compileProvider) {
-        $compileProvider.debugInfoEnabled(false);
-      });
-
-      inject(function($compile, $rootScope, $mdUtil) {
-        var widget = angular.element($compile('<div><button><img></button></div>')($rootScope));
-        var button = angular.element(widget.children()[0]);
-
-        $rootScope.$apply();
-        expect(button.scope()).toBe(undefined);
-        expect($mdUtil.validateScope(button)).toBe(false);
-
-      });
-    });
-
-    it("should find a valid scope when debug is enabled", function() {
-      module(function($compileProvider) {
-        $compileProvider.debugInfoEnabled(true);
-      });
-
-      inject(function($compile, $rootScope, $mdUtil) {
-        var widget = angular.element($compile('<div><button><img></button></div>')($rootScope));
-        var button = angular.element(widget.children()[0]);
-
-        $rootScope.$apply();
-        expect(button.scope()).toBeDefined();
-        expect($mdUtil.validateScope(button)).toBe(true);
-      });
-    });
-  });
-
   describe('with no overrides', function() {
     beforeEach(module('material.core'));
 
@@ -318,6 +284,45 @@ describe('util', function() {
           expect($mdUtil.hasComputedStyle(elem, 'height')).toBe(false);
         }));
       });
+    });
+
+    describe('parseAttributeBoolean', function() {
+
+      it('should validate `1` string to be true', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean('1')).toBe(true);
+      }));
+
+      it('should validate an empty value to be true', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean('')).toBe(true);
+      }));
+
+      it('should validate `false` text to be false', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean('false')).toBe(false);
+      }));
+
+      it('should validate `true` text to be true', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean('true')).toBe(true);
+      }));
+
+      it('should validate a random text to be true', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean('random-string')).toBe(true);
+      }));
+
+      it('should validate `0` text to be false', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean('0')).toBe(false);
+      }));
+
+      it('should validate true boolean to be true', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean(true)).toBe(true);
+      }));
+
+      it('should validate false boolean to be false', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean(false)).toBe(false);
+      }));
+
+      it('should validate `false` text to be true when ignoring negative values', inject(function($mdUtil) {
+        expect($mdUtil.parseAttributeBoolean('false', false)).toBe(true);
+      }));
     });
 
     describe('getParentWithPointerEvents', function () {

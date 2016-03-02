@@ -210,7 +210,7 @@ describe('<md-virtual-repeat>', function() {
 
     // Scroll past the fourth item.
     // Expect that one new item is created.
-    scroller[0].scrollLeft = ITEM_SIZE * (VirtualRepeatController.NUM_EXTRA + 1);;
+    scroller[0].scrollLeft = ITEM_SIZE * (VirtualRepeatController.NUM_EXTRA + 1);
     scroller.triggerHandler('scroll');
     expect(getTransform(offsetter)).toBe('translateX(10px)');
     repeated = getRepeated();
@@ -597,7 +597,7 @@ describe('<md-virtual-repeat>', function() {
     scroller[0].scrollTop = 20;
     scope.$parent.$broadcast('$md-resize');
 
-    // Expect 43 children (40 + 5 extra).
+    // Expect 45 children (40 + 5 extra).
     expect(offsetter.children().length).toBe(45);
   });
 
@@ -615,6 +615,48 @@ describe('<md-virtual-repeat>', function() {
     expect(component[0].clientHeight).toBe(50);
     expect(offsetter.children().length).toBe(3);
   }));
+
+  it('should not scroll past the bottom', function() {
+    scope.items = createItems(101);
+    createRepeater();
+
+    scroller[0].scrollTop = ITEM_SIZE * 91;
+    scroller.triggerHandler('scroll');
+
+    expect(getTransform(offsetter)).toBe('translateY(880px)');
+
+    scroller[0].scrollTop++;
+    scroller.triggerHandler('scroll');
+
+    expect(getTransform(offsetter)).toBe('translateY(880px)');
+  });
+
+  describe('md-on-demand', function() {
+
+    it('should validate an empty md-on-demand attribute value correctly', inject(function() {
+      repeater.attr('md-on-demand', '');
+      createRepeater();
+
+      var containerCtrl = component.controller('mdVirtualRepeatContainer');
+      expect(containerCtrl.repeater.onDemand).toBe(true);
+    }));
+
+    it('should validate md-on-demand attribute with `true` correctly', inject(function() {
+      repeater.attr('md-on-demand', 'true');
+      createRepeater();
+
+      var containerCtrl = component.controller('mdVirtualRepeatContainer');
+      expect(containerCtrl.repeater.onDemand).toBe(true);
+    }));
+
+    it('should validate md-on-demand attribute with `false` correctly', inject(function() {
+      repeater.attr('md-on-demand', 'false');
+      createRepeater();
+
+      var containerCtrl = component.controller('mdVirtualRepeatContainer');
+      expect(containerCtrl.repeater.onDemand).toBe(false);
+    }));
+  });
 
   /**
    * Facade to access transform properly even when jQuery is used;

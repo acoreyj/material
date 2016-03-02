@@ -20,8 +20,8 @@ describe('md-input-container directive', function() {
 
     var template =
         '<md-input-container>' +
-          '<input ' + (attrs || '') + '>' +
           '<label></label>' +
+          '<input ' + (attrs || '') + '>' +
         '</md-input-container>';
 
     if (isForm) {
@@ -74,6 +74,45 @@ describe('md-input-container directive', function() {
     expect(el.find('md-input-container')).toHaveClass('md-input-invalid');
   });
 
+  it('should show error on $submitted and $invalid with nested forms', function() {
+    var template =
+      '<form>' +
+      '<div ng-form>' +
+      '<md-input-container>' +
+      '<input ng-model="foo">' +
+      '<label></label>' +
+      '</md-input-container>' +
+      '</div>' +
+      '</form>';
+
+    var parentForm = $compile(template)(pageScope);
+    pageScope.$apply();
+
+    expect(parentForm.find('md-input-container')).not.toHaveClass('md-input-invalid');
+
+    var model = parentForm.find('input').controller('ngModel');
+    model.$invalid = true;
+
+    var form = parentForm.controller('form');
+    form.$submitted = true;
+    pageScope.$apply();
+
+    expect(parentForm.find('md-input-container')).toHaveClass('md-input-invalid');
+  });
+
+  it('should not show error on $invalid and not $submitted', function() {
+    var el = setup('ng-model="foo"', true);
+
+    expect(el.find('md-input-container')).not.toHaveClass('md-input-invalid');
+
+    var model = el.find('input').controller('ngModel');
+    model.$invalid = true;
+
+    pageScope.$apply();
+
+    expect(el.find('md-input-container')).not.toHaveClass('md-input-invalid');
+  });
+
   it('should show error with given md-is-error expression', function() {
     var el = $compile(
         '<md-input-container md-is-error="isError">' +
@@ -95,9 +134,18 @@ describe('md-input-container directive', function() {
     expect(el).not.toHaveClass('md-input-focused');
 
     el.find('input').triggerHandler('focus');
+
+    // Expect a slight delay (via $mdUtil.nextTick()) which fixes a tabbing issue in Safari, see
+    // https://github.com/angular/material/issues/4203 for more info.
+    expect(el).not.toHaveClass('md-input-focused');
+    $timeout.flush();
     expect(el).toHaveClass('md-input-focused');
 
     el.find('input').triggerHandler('blur');
+
+    // Again, expect the change to not be immediate
+    expect(el).toHaveClass('md-input-focused');
+    $timeout.flush();
     expect(el).not.toHaveClass('md-input-focused');
   });
 
@@ -145,6 +193,31 @@ describe('md-input-container directive', function() {
     var el = setup();
     expect(el.find('input').attr('id')).toBeTruthy();
     expect(el.find('label').attr('for')).toBe(el.find('input').attr('id'));
+  });
+
+  describe('md-no-asterisk', function() {
+
+    it('should not show asterisk on required label if disabled', function() {
+      var el = setup('md-no-asterisk required');
+      var ctrl = el.controller('mdInputContainer');
+
+      expect(ctrl.label).not.toHaveClass('md-required');
+    });
+
+    it('should not show an asterisk when attribute value is `true`', function() {
+      var el = setup('md-no-asterisk="true" required');
+      var ctrl = el.controller('mdInputContainer');
+
+      expect(ctrl.label).not.toHaveClass('md-required');
+    });
+
+    it('should show an asterisk when attribute value is `false`', function() {
+      var el = setup('md-no-asterisk="false" required');
+      var ctrl = el.controller('mdInputContainer');
+
+      expect(ctrl.label).toHaveClass('md-required');
+    });
+
   });
 
   describe('md-maxlength', function() {
@@ -349,6 +422,26 @@ describe('md-input-container directive', function() {
     expect(el[0].querySelector("[ng-messages]").classList.contains('md-auto-hide')).toBe(false);
   }));
 
+  it('should select the input value on focus', inject(function() {
+    var container = setup('md-select-on-focus');
+    var input = container.find('input');
+    input.val('Auto Text Select');
+
+    document.body.appendChild(container[0]);
+
+    expect(isTextSelected(input[0])).toBe(false);
+
+    input.triggerHandler('focus');
+
+    expect(isTextSelected(input[0])).toBe(true);
+
+    document.body.removeChild(container[0]);
+
+    function isTextSelected(input) {
+      return input.selectionStart == 0 && input.selectionEnd == input.value.length
+    }
+  }));
+
   describe('Textarea auto-sizing', function() {
     var ngElement, element, ngTextarea, textarea, scope, parentElement;
 
@@ -417,6 +510,118 @@ describe('md-input-container directive', function() {
       $timeout.flush();
       var newHeight = textarea.offsetHeight;
       expect(textarea.offsetHeight).toBeGreaterThan(oldHeight);
+    });
+  });
+
+  describe('icons', function () {
+    it('should add md-icon-left class when md-icon is before the input', function () {
+      var el = compile(
+        '<md-input-container>' +
+        '  <md-icon></md-icon>' +
+        '  <input ng-model="foo">' +
+        '</md-input-container>'
+      );
+
+      expect(el.hasClass('md-icon-left')).toBeTruthy();
+
+    });
+
+    it('should add md-icon-left class when .md-icon is before the input', function () {
+      var el = compile(
+        '<md-input-container>' +
+        '  <i class="md-icon"></i>' +
+        '  <input ng-model="foo">' +
+        '</md-input-container>'
+      );
+      expect(el.hasClass('md-icon-left')).toBeTruthy();
+    });
+
+    it('should add md-icon-right class when md-icon is after the input', function () {
+      var el = compile(
+        '<md-input-container>' +
+        '  <input ng-model="foo">' +
+        '  <md-icon></md-icon>' +
+        '</md-input-container>'
+      );
+
+      expect(el.hasClass('md-icon-right')).toBeTruthy();
+
+    });
+
+    it('should add md-icon-right class when .md-icon is after the input', function () {
+      var el = compile(
+        '<md-input-container>' +
+        '  <input ng-model="foo">' +
+        '  <i class="md-icon"></i>' +
+        '</md-input-container>'
+      );
+      expect(el.hasClass('md-icon-right')).toBeTruthy();
+    });
+
+    it('should add md-icon-left and md-icon-right classes when md-icons are before and after the input', function () {
+      var el = compile(
+        '<md-input-container>' +
+        '  <md-icon></md-icon>' +
+        '  <input ng-model="foo">' +
+        '  <md-icon></md-icon>' +
+        '</md-input-container>'
+      );
+      expect(el.hasClass('md-icon-left md-icon-right')).toBeTruthy();
+    });
+
+    it('should add md-icon-left and md-icon-right classes when .md-icons are before and after the input', function () {
+      var el = compile(
+        '<md-input-container>' +
+        '  <i class="md-icon"></i>' +
+        '  <input ng-model="foo">' +
+        '  <i class="md-icon"></i>' +
+        '</md-input-container>'
+      );
+      expect(el.hasClass('md-icon-left md-icon-right')).toBeTruthy();
+    });
+
+    it('should add md-icon-left class when md-icon is before select', function() {
+      var el = compile(
+        '<md-input-container>' +
+          '<md-icon></md-icon>' +
+          '<md-select ng-model="foo"></md-select>' +
+        '</md-input-container>'
+      );
+
+      expect(el.hasClass('md-icon-left')).toBeTruthy();
+    });
+
+    it('should add md-icon-right class when md-icon is before select', function() {
+      var el = compile(
+        '<md-input-container>' +
+          '<md-select ng-model="foo"></md-select>' +
+          '<md-icon></md-icon>' +
+        '</md-input-container>'
+      );
+
+      expect(el.hasClass('md-icon-right')).toBeTruthy();
+    });
+
+    it('should add md-icon-left class when md-icon is before textarea', function() {
+      var el = compile(
+        '<md-input-container>' +
+          '<md-icon></md-icon>' +
+          '<textarea ng-model="foo"></textarea>' +
+        '</md-input-container>'
+      );
+
+      expect(el.hasClass('md-icon-left')).toBeTruthy();
+    });
+
+    it('should add md-icon-right class when md-icon is before textarea', function() {
+      var el = compile(
+        '<md-input-container>' +
+          '<textarea ng-model="foo"></textarea>' +
+          '<md-icon></md-icon>' +
+        '</md-input-container>'
+      );
+
+      expect(el.hasClass('md-icon-right')).toBeTruthy();
     });
   });
 });

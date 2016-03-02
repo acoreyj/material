@@ -473,16 +473,10 @@ describe('mdIcon service', function() {
       'height': '100%',
       'width' : '100%',
       'preserveAspectRatio': 'xMidYMid meet',
-      'viewBox' : svg.getAttribute('viewBox') || '0 0 24 24'
+      'viewBox' : svg.getAttribute('viewBox') || '0 0 24 24',
+      'focusable': false
     }, function(val, attr) {
       svg.setAttribute(attr, val);
-    }, this);
-
-    angular.forEach({
-      'pointer-events' : 'none',
-      'display' : 'block'
-    }, function(val, style) {
-      svg.style[style] = val;
     }, this);
 
     return svg.outerHTML;

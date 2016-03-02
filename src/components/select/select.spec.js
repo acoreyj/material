@@ -11,7 +11,7 @@ describe('<md-select>', function() {
 
   afterEach(inject(function ($document) {
     var body = $document[0].body;
-    var children = body.querySelectorAll('.md-select-menu-container');
+    var children = body.querySelectorAll('._md-select-menu-container');
     for (var i = 0; i < children.length; i++) {
       angular.element(children[i]).remove();
     }
@@ -52,7 +52,25 @@ describe('<md-select>', function() {
     var select = setupSelect('ng-model="val", md-container-class="test"').find('md-select');
     openSelect(select);
 
-    var container = $document[0].querySelector('.md-select-menu-container');
+    var container = $document[0].querySelector('._md-select-menu-container');
+    expect(container).toBeTruthy();
+    expect(container.classList.contains('test')).toBe(true);
+  }));
+
+  it('supports passing classes to the container using `data-` attribute prefix', inject(function($document) {
+    var select = setupSelect('ng-model="val", data-md-container-class="test"').find('md-select');
+    openSelect(select);
+
+    var container = $document[0].querySelector('._md-select-menu-container');
+    expect(container).toBeTruthy();
+    expect(container.classList.contains('test')).toBe(true);
+  }));
+
+  it('supports passing classes to the container using `x-` attribute prefix', inject(function($document) {
+    var select = setupSelect('ng-model="val", x-md-container-class="test"').find('md-select');
+    openSelect(select);
+
+    var container = $document[0].querySelector('._md-select-menu-container');
     expect(container).toBeTruthy();
     expect(container.classList.contains('test')).toBe(true);
   }));
@@ -61,7 +79,7 @@ describe('<md-select>', function() {
     var select = setupSelect('ng-model="val"').find('md-select');
     var ownsId = select.attr('aria-owns');
     expect(ownsId).toBeTruthy();
-    var containerId = select[0].querySelector('.md-select-menu-container').getAttribute('id');
+    var containerId = select[0].querySelector('._md-select-menu-container').getAttribute('id');
     expect(ownsId).toBe(containerId);
   });
 
@@ -209,7 +227,7 @@ describe('<md-select>', function() {
       var select = setupSelect('ng-model="someVal", placeholder="Hello world"', null, true).find('md-select');
       var label = select.find('md-select-value');
       expect(label.text()).toBe('Hello world');
-      expect(label.hasClass('md-select-placeholder')).toBe(true);
+      expect(label.hasClass('_md-select-placeholder')).toBe(true);
     });
 
     it('sets itself to the selected option\'s label', inject(function($rootScope, $compile) {
@@ -385,6 +403,19 @@ describe('<md-select>', function() {
         $rootScope.$apply('model = {}');
 
         expect(selectedOptions(el).length).toBe(0);
+      }));
+
+      it('should keep the form pristine when model is predefined', inject(function($rootScope, $timeout, $compile) {
+        $rootScope.model = 2;
+        $rootScope.opts = [1, 2, 3, 4];
+        $compile('<form name="testForm">' +
+          '<md-select ng-model="model" name="multiSelect">' +
+            '<md-option ng-repeat="opt in opts" ng-value="opt"></md-option>' +
+          '</md-select></form>')($rootScope);
+        $rootScope.$digest();
+        $timeout.flush();
+
+        expect($rootScope.testForm.$pristine).toBe(true);
       }));
 
     });
@@ -637,13 +668,25 @@ describe('<md-select>', function() {
           $rootScope.model = [];
           $rootScope.opts = [1, 2, 3, 4];
           $compile('<form name="testForm">' +
-            '<md-select ng-model="model", name="multiSelect" required="required" multiple="multiple">' +
+            '<md-select ng-model="model" name="multiSelect" required="required" multiple="multiple">' +
               '<md-option ng-repeat="opt in opts" ng-value="opt"></md-option>' +
             '</md-select></form>')($rootScope);
           $rootScope.$digest();
           expect($rootScope.testForm.$valid).toBe(false);
       }));
 
+      it('should keep the form pristine when model is predefined', inject(function($rootScope, $timeout, $compile) {
+        $rootScope.model = [1, 2];
+        $rootScope.opts = [1, 2, 3, 4];
+        $compile('<form name="testForm">' +
+          '<md-select ng-model="model" name="multiSelect" multiple="multiple">' +
+            '<md-option ng-repeat="opt in opts" ng-value="opt"></md-option>' +
+          '</md-select></form>')($rootScope);
+        $rootScope.$digest();
+        $timeout.flush();
+
+        expect($rootScope.testForm.$pristine).toBe(true);
+      }));
     });
 
     describe('view->model', function() {
@@ -706,6 +749,16 @@ describe('<md-select>', function() {
         expect(el.find('md-option').eq(0).attr('selected')).toBe('selected');
         expect(el.find('md-option').eq(2).attr('selected')).toBe('selected');
         expect($rootScope.model).toEqual([1,3]);
+      }));
+
+      it('should not be multiple if attr.multiple == `false`', inject(function($document) {
+        var el = setupSelect('multiple="false" ng-model="$root.model"').find('md-select');
+        openSelect(el);
+        expectSelectOpen(el);
+
+        var selectMenu = $document.find('md-select-menu')[0];
+
+        expect(selectMenu.hasAttribute('multiple')).toBe(false);
       }));
 
     });
@@ -948,9 +1001,9 @@ describe('<md-select>', function() {
 
   function expectSelectClosed(element) {
     inject(function($document) {
-      var menu = angular.element($document[0].querySelector('.md-select-menu-container'));
+      var menu = angular.element($document[0].querySelector('._md-select-menu-container'));
       if (menu.length) {
-        if (menu.hasClass('md-active') || menu.attr('aria-hidden') == 'false') {
+        if (menu.hasClass('_md-active') || menu.attr('aria-hidden') == 'false') {
           throw Error('Expected select to be closed');
         }
       }
@@ -959,8 +1012,8 @@ describe('<md-select>', function() {
 
   function expectSelectOpen(element) {
     inject(function($document) {
-      var menu = angular.element($document[0].querySelector('.md-select-menu-container'));
-      if (!(menu.hasClass('md-active') && menu.attr('aria-hidden') == 'false')) {
+      var menu = angular.element($document[0].querySelector('._md-select-menu-container'));
+      if (!(menu.hasClass('_md-active') && menu.attr('aria-hidden') == 'false')) {
         throw Error('Expected select to be open');
       }
     });

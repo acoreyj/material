@@ -155,6 +155,58 @@ describe('md-date-picker', function() {
       expect(controller.ngModelCtrl.$error['maxdate']).toBe(true);
     });
 
+    it('should ignore the time portion when comparing max-date', function() {
+      // Given that selected date is the same day as maxdate but at a later time.
+      pageScope.maxDate = new Date(2015, JAN, 1, 5, 30);
+      pageScope.myDate = new Date(2015, JAN, 1, 7, 30);
+      pageScope.$apply();
+
+      expect(controller.ngModelCtrl.$error['maxdate']).toBeFalsy();
+    });
+
+    it('should ignore the time portion when comparing min-date', function() {
+      // Given that selected date is the same day as mindate but at an earlier time.
+      pageScope.minDate = new Date(2015, JAN, 1, 5, 30);
+      pageScope.myDate = new Date(2015, JAN, 1);
+      pageScope.$apply();
+
+      expect(controller.ngModelCtrl.$error['mindate']).toBeFalsy();
+    });
+
+    it('should allow selecting a date exactly equal to the max-date', function() {
+      pageScope.maxDate = new Date(2015, JAN, 1);
+      pageScope.myDate = new Date(2015, JAN, 1);
+      pageScope.$apply();
+
+      expect(controller.ngModelCtrl.$error['maxdate']).toBeFalsy();
+    });
+
+    it('should allow selecting a date exactly equal to the min-date', function() {
+      pageScope.minDate = new Date(2015, JAN, 1);
+      pageScope.myDate = new Date(2015, JAN, 1);
+      pageScope.$apply();
+
+      expect(controller.ngModelCtrl.$error['mindate']).toBeFalsy();
+    });
+
+    it('should not enforce `required` when a min-date is set', function() {
+      pageScope.isRequired = false;
+      pageScope.minDate = new Date(2015, JAN, 1);
+      pageScope.myDate = null;
+      pageScope.$apply();
+
+      expect(controller.ngModelCtrl.$error['mindate']).toBeFalsy();
+    });
+
+    it('should not enforce `required` when a max-date is set', function() {
+      pageScope.isRequired = false;
+      pageScope.maxDate = new Date(2015, JAN, 1);
+      pageScope.myDate = null;
+      pageScope.$apply();
+
+      expect(controller.ngModelCtrl.$error['mindate']).toBeFalsy();
+    });
+
     describe('inside of a form element', function() {
       var formCtrl;
 
@@ -257,6 +309,28 @@ describe('md-date-picker', function() {
 
       populateInputElement('5/30/2014');
       expect(controller.ngModelCtrl.$modelValue).toEqual(initialDate);
+    });
+
+    it('shoud become touched from bluring closing the pane', function() {
+      populateInputElement('17/1/2015');
+
+      controller.openCalendarPane({
+        target: controller.inputElement
+      });
+      controller.closeCalendarPane();
+
+      expect(controller.ngModelCtrl.$touched).toBe(true);
+    });
+
+    it('should become touch from bluring the input', function() {
+      populateInputElement('17/1/2015');
+
+      var input = angular.element(controller.inputElement);
+
+      input.triggerHandler('focus');
+      input.triggerHandler('blur');
+
+      expect(controller.ngModelCtrl.$touched).toBe(true);
     });
 
     it('should not update the input string is not "complete"', function() {
