@@ -52,7 +52,7 @@ The patch builds (1.0.4, 1.0.5, 1.0.6) are prepared based on commits in the `pat
 
 ##### Minor Releases
 
-The minor build (1.1.0, 1.2.0, 1.3.0,...) are prepared based on commits in the `master` branch; which will remain the daily development branch AND will be the source for the `minor` releases.
+The minor build (1.1.0_1, 1.2.0, 1.3.0,...) are prepared based on commits in the `master` branch; which will remain the daily development branch AND will be the source for the `minor` releases.
 
 Our formal release of `minor` builds is much less frequent; probably 1x / Quarter. Developers can easily obtain the latest, full change-set from bower or npm using references to `@master`.
 

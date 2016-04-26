@@ -1,5 +1,5 @@
-<a name"1.1.0-rc4"></a>
-### 1.1.0-rc4 (2016-04-15)
+<a name"1.1.0_1-rc4"></a>
+### 1.1.0_1-rc4 (2016-04-15)
 
 This release we added a new feature `md-select-header` which supports custom content in the header of the `md-select` component:
 
@@ -37,8 +37,8 @@ Thanks to the great contributors who helped with this release:
 
 
 
-<a name"1.1.0-rc3"></a>
-### 1.1.0-rc3 (2016-04-13)
+<a name"1.1.0_1-rc3"></a>
+### 1.1.0_1-rc3 (2016-04-13)
 
 This RC3 provides several fixes to Theme foreground and background colors. Also included is a **Colors** demo *Theme ColorPicker* that will be useful for developers interested using Theme colors and the new `md-colors` directive within their own custom components.
 
@@ -65,7 +65,7 @@ This RC3 provides several fixes to Theme foreground and background colors. Also 
 * RadioButton: container uses `color: '{{accent-A700}}';`
 * Select: accent uses color: `'{{accent-color}}';`
 * Slider: focus reing uses  `background-color: '{{accent-A200-0.2}}';`
-* Toast: uses `color: '{{accent-color}}';` instead of `color: '{{accent-A200}}';` 
+* Toast: uses `color: '{{accent-color}}';` instead of `color: '{{accent-A200}}';`
 
 
 #### Bug Fixes
@@ -230,8 +230,8 @@ Thanks to the great contributors who helped with this release:
 
 
 
-<a name"1.1.0-rc2"></a>
-### 1.1.0-rc2 (2016-03-30)
+<a name"1.1.0_1-rc2"></a>
+### 1.1.0_1-rc2 (2016-03-30)
 
 
 #### Features
@@ -325,8 +325,8 @@ Thanks to the great contributors who helped with this release:
 * **toast:** better toast templating allowing comments and sibling elements ([43d53878](https://github.com/angular/material/commit/43d53878), closes [#6259](https://github.com/angular/material/issues/6259), [#6494](https://github.com/angular/material/issues/6494))
 
 
-<a name"1.1.0-rc1"></a>
-### 1.1.0-rc1 (2016-03-09)
+<a name"1.1.0_1-rc1"></a>
+### 1.1.0_1-rc1 (2016-03-09)
 
 
 #### Features

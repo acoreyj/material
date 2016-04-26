@@ -1,6 +1,6 @@
 {
   "name": "angular-material-source-cj",
-  "version": "1.1.0-cj",
+  "version": "1.1.0_1-cj",
   "description": "The Angular Material project is an implementation of Material Design in Angular.js. This project provides a set of reusable, well-tested, and accessible UI components based on the Material Design system. Similar to the Polymer project's Paper elements collection, Angular Material is supported internally at Google by the Angular.js, Material Design UX and other product teams.",
   "keywords": "client-side, browser, material, material-design, design, angular, css, components, google",
   "homepage": "https://material.angularjs.org",
@@ -16,7 +16,6 @@
     "type": "git",
     "url": "git://github.com/angular/material.git"
   },
-  "private": true,
   "style": "./dist/angular-material.css",
   "scss": "./dist/angular-material.scss",
   "devDependencies": {
@@ -31,7 +30,7 @@
     "angularytics": "^0.3.0",
     "canonical-path": "0.0.2",
     "cli-color": "^1.0.0",
-    "colors": "^1.1.0",
+    "colors": "^1.1.0_1",
     "conventional-changelog": "git://github.com/robertmesserle/conventional-changelog.git",
     "dgeni": "^0.4.1",
     "dgeni-packages": "^0.10.3",
@@ -70,7 +69,7 @@
     "lazypipe": "^0.2.2",
     "lodash": "^3.0.0",
     "merge-stream": "^0.1.6",
-    "minimist": "^1.1.0",
+    "minimist": "^1.1.0_1",
     "mkdirp": "^0.5.0",
     "phantomjs-prebuilt": "^2.1.7",
     "prompt-sync": "^1.0.0",
