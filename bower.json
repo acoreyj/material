@@ -1,6 +1,6 @@
 {
   "name": "angular-material-cj",
-  "version": "1.0.6-cj",
+  "version": "1.1.0-cj",
   "ignore": ["/*",
              "/dist/docs",
              "!/dist",
