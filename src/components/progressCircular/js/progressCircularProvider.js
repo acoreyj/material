@@ -14,18 +14,18 @@
  *
  * @property {number} durationIndeterminate Duration of the indeterminate animation.
  * @property {number} startIndeterminate Indeterminate animation start point.
- * @param {number} endIndeterminate Indeterminate animation end point.
- * @param {function} easeFnIndeterminate Easing function to be used when animating
+ * @property {number} endIndeterminate Indeterminate animation end point.
+ * @property {function} easeFnIndeterminate Easing function to be used when animating
  * between the indeterminate values.
  *
  * @property {(function(object): object)} configure Used to modify the default options.
  *
  * @usage
  * <hljs lang="js">
- *   myAppModule.config(function($mdProgressCircular) {
+ *   myAppModule.config(function($mdProgressCircularProvider) {
  *
  *     // Example of changing the default progress options.
- *     $mdProgressCircular.configure({
+ *     $mdProgressCircularProvider.configure({
  *       progressSize: 100,
  *       strokeWidth: 20,
  *       duration: 800
@@ -46,8 +46,8 @@ function MdProgressCircularProvider() {
     duration: 100,
     easeFn: linearEase,
 
-    durationIndeterminate: 600,
-    startIndeterminate: 2.5,
+    durationIndeterminate: 500,
+    startIndeterminate: 3,
     endIndeterminate: 80,
     easeFnIndeterminate: materialEase,
 

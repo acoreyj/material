@@ -74,16 +74,14 @@ for VERSION in "${VERSIONS[@]}"; do
     ZIP_URL="$CDN/$VERSION/angular-$VERSION.zip"
   fi
 
+  ZIP_FILE="angular-$VERSION.zip"
+  ZIP_FILE_PATH="./tmp/$ZIP_FILE"
   BASE_DIR="./tmp/angular-$VERSION"
 
-  if [ ! -d $BASE_DIR ]; then
-    ZIP_FILE="angular-$VERSION.zip"
-    ZIP_FILE_PATH="./tmp/$ZIP_FILE"
-
-    curl $ZIP_URL > $ZIP_FILE_PATH
-    unzip -d $BASE_DIR $ZIP_FILE_PATH
-    mv "$BASE_DIR/angular-$ZIP_FILE_SHA" "$BASE_DIR/files"
-  fi
+  rm -rf $BASE_DIR
+  curl $ZIP_URL > $ZIP_FILE_PATH
+  unzip -d $BASE_DIR $ZIP_FILE_PATH
+  mv "$BASE_DIR/angular-$ZIP_FILE_SHA" "$BASE_DIR/files"
 
   echo "\n\n--- Testing AngularMaterial against AngularJS (${VERSION}) ---\n"
 

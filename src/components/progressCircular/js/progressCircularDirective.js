@@ -18,8 +18,8 @@
  *
  * @param {string} md-mode Select from one of two modes: **'determinate'** and **'indeterminate'**.
  *
- * Note: if the `md-mode` value is set as undefined or specified as not 1 of the two (2) valid modes, then `.ng-hide`
- * will be auto-applied as a style to the component.
+ * Note: if the `md-mode` value is set as undefined or specified as not 1 of the two (2) valid modes, then **'indeterminate'**
+ * will be auto-applied as the mode.
  *
  * Note: if not configured, the `md-mode="indeterminate"` will be auto injected as an attribute.
  * If `value=""` is also specified, however, then `md-mode="determinate"` would be auto-injected instead.
@@ -28,6 +28,8 @@
  * @param {number=} md-diameter This specifies the diameter of the circular progress. The value
  * should be a pixel-size value (eg '100'). If this attribute is
  * not present then a default value of '50px' is assumed.
+ *
+ * @param {boolean=} ng-disabled Determines whether to disable the progress element.
  *
  * @usage
  * <hljs lang="html">
@@ -43,20 +45,20 @@
 
 angular
   .module('material.components.progressCircular')
-  .directive('mdProgressCircular', [
-    '$$rAF',
-    '$window',
-    '$mdProgressCircular',
-    '$interval',
-    '$mdUtil',
-    '$log',
-    MdProgressCircularDirective
-  ]);
+  .directive('mdProgressCircular', MdProgressCircularDirective);
 
-function MdProgressCircularDirective($$rAF, $window, $mdProgressCircular, $interval, $mdUtil, $log) {
+/* @ngInject */
+function MdProgressCircularDirective($window, $mdProgressCircular, $mdTheming,
+                                     $mdUtil, $interval, $log) {
+
+  // Note that this shouldn't use use $$rAF, because it can cause an infinite loop
+  // in any tests that call $animate.flush.
+  var rAF = $window.requestAnimationFrame || angular.noop;
+  var cAF = $window.cancelAnimationFrame || angular.noop;
   var DEGREE_IN_RADIANS = $window.Math.PI / 180;
   var MODE_DETERMINATE = 'determinate';
   var MODE_INDETERMINATE = 'indeterminate';
+  var DISABLED_CLASS = '_md-progress-circular-disabled';
   var INDETERMINATE_CLASS = '_md-mode-indeterminate';
 
   return {
@@ -70,7 +72,7 @@ function MdProgressCircularDirective($$rAF, $window, $mdProgressCircular, $inter
       '<svg xmlns="http://www.w3.org/2000/svg">' +
         '<path fill="none"/>' +
       '</svg>',
-    compile: function(element, attrs){
+    compile: function(element, attrs) {
       element.attr({
         'aria-valuemin': 0,
         'aria-valuemax': 100,
@@ -82,7 +84,7 @@ function MdProgressCircularDirective($$rAF, $window, $mdProgressCircular, $inter
         var mode = hasValue ? MODE_DETERMINATE : MODE_INDETERMINATE;
         var info = "Auto-adding the missing md-mode='{0}' to the ProgressCircular element";
 
-        $log.debug( $mdUtil.supplant(info, [mode]) );
+          // $log.debug( $mdUtil.supplant(info, [mode]) );
         attrs.$set('mdMode', mode);
       } else {
         attrs.$set('mdMode', attrs.mdMode.trim());
@@ -92,74 +94,122 @@ function MdProgressCircularDirective($$rAF, $window, $mdProgressCircular, $inter
     }
   };
 
-  function MdProgressCircularLink(scope, element) {
-    var svg = angular.element(element[0].querySelector('svg'));
-    var path = angular.element(element[0].querySelector('path'));
-    var lastAnimationId = 0;
+  function MdProgressCircularLink(scope, element, attrs) {
+    var node = element[0];
+    var svg = angular.element(node.querySelector('svg'));
+    var path = angular.element(node.querySelector('path'));
     var startIndeterminate = $mdProgressCircular.startIndeterminate;
     var endIndeterminate = $mdProgressCircular.endIndeterminate;
     var rotationIndeterminate = 0;
+    var lastAnimationId = 0;
+    var lastDrawFrame;
     var interval;
 
-    scope.$watchGroup(['value', 'mdMode', 'mdDiameter'], function(newValues, oldValues) {
-      var mode = newValues[1];
+    $mdTheming(element);
+    element.toggleClass(DISABLED_CLASS, attrs.hasOwnProperty('disabled'));
 
-      if (mode !== MODE_DETERMINATE && mode !== MODE_INDETERMINATE) {
-        cleanupIndeterminate();
-        element.addClass('ng-hide');
-      } else {
-        element.removeClass('ng-hide');
+    // If the mode is indeterminate, it doesn't need to
+    // wait for the next digest. It can start right away.
+    if(scope.mdMode === MODE_INDETERMINATE){
+      startIndeterminateAnimation();
+    }
 
-        if (mode === MODE_INDETERMINATE){
-          if (!interval) {
-            interval = $interval(
-              animateIndeterminate,
-              $mdProgressCircular.durationIndeterminate + 50,
-              0,
-              false
-            );
+    scope.$on('$destroy', function(){
+      cleanupIndeterminateAnimation();
 
-            element.addClass(INDETERMINATE_CLASS);
-            animateIndeterminate();
-          }
-
-        } else {
-          cleanupIndeterminate();
-          renderCircle(clamp(oldValues[0]), clamp(newValues[0]));
-        }
+      if (lastDrawFrame) {
+        cAF(lastDrawFrame);
       }
     });
 
-    function renderCircle(animateFrom, animateTo, easing, duration, rotation) {
-      var id = ++lastAnimationId;
-      var startTime = new $window.Date();
-      var changeInValue = animateTo - animateFrom;
-      var diameter = getSize(scope.mdDiameter);
-      var strokeWidth = $mdProgressCircular.strokeWidth / 100 * diameter;
+    scope.$watchGroup(['value', 'mdMode', function() {
+      var isDisabled = node.disabled;
 
-      var pathDiameter = diameter - strokeWidth;
-      var ease = easing || $mdProgressCircular.easeFn;
-      var animationDuration = duration || $mdProgressCircular.duration;
+      // Sometimes the browser doesn't return a boolean, in
+      // which case we should check whether the attribute is
+      // present.
+      if (isDisabled === true || isDisabled === false){
+        return isDisabled;
+      }
+      return angular.isDefined(element.attr('disabled'));
 
-      element.attr('aria-valuenow', animateTo);
-      path.attr('stroke-width', strokeWidth + 'px');
+    }], function(newValues, oldValues) {
+      var mode = newValues[1];
+      var isDisabled = newValues[2];
+      var wasDisabled = oldValues[2];
 
-      svg.css({
+      if (isDisabled !== wasDisabled) {
+        element.toggleClass(DISABLED_CLASS, !!isDisabled);
+      }
+
+      if (isDisabled) {
+        cleanupIndeterminateAnimation();
+      } else {
+        if (mode !== MODE_DETERMINATE && mode !== MODE_INDETERMINATE) {
+          mode = MODE_INDETERMINATE;
+          attrs.$set('mdMode', mode);
+        }
+
+        if (mode === MODE_INDETERMINATE) {
+          startIndeterminateAnimation();
+        } else {
+          var newValue = clamp(newValues[0]);
+
+          cleanupIndeterminateAnimation();
+
+          element.attr('aria-valuenow', newValue);
+          renderCircle(clamp(oldValues[0]), newValue);
+        }
+      }
+
+    });
+
+    // This is in a separate watch in order to avoid layout, unless
+    // the value has actually changed.
+    scope.$watch('mdDiameter', function(newValue) {
+      var diameter = getSize(newValue);
+      var strokeWidth = getStroke(diameter);
+      var transformOrigin = (diameter / 2) + 'px';
+      var dimensions = {
         width: diameter + 'px',
         height: diameter + 'px'
-      });
+      };
 
       // The viewBox has to be applied via setAttribute, because it is
       // case-sensitive. If jQuery is included in the page, `.attr` lowercases
       // all attribute names.
       svg[0].setAttribute('viewBox', '0 0 ' + diameter + ' ' + diameter);
 
+      // Usually viewBox sets the dimensions for the SVG, however that doesn't
+      // seem to be the case on IE10.
+      // Important! The transform origin has to be set from here and it has to
+      // be in the format of "Ypx Ypx Ypx", otherwise the rotation wobbles in
+      // IE and Edge, because they don't account for the stroke width when
+      // rotating. Also "center" doesn't help in this case, it has to be a
+      // precise value.
+      svg
+        .css(dimensions)
+        .css('transform-origin', transformOrigin + ' ' + transformOrigin + ' ' + transformOrigin);
+
+      element.css(dimensions);
+      path.css('stroke-width',  strokeWidth + 'px');
+    });
+
+    function renderCircle(animateFrom, animateTo, easing, duration, rotation) {
+      var id = ++lastAnimationId;
+      var startTime = $mdUtil.now();
+      var changeInValue = animateTo - animateFrom;
+      var diameter = getSize(scope.mdDiameter);
+      var pathDiameter = diameter - getStroke(diameter);
+      var ease = easing || $mdProgressCircular.easeFn;
+      var animationDuration = duration || $mdProgressCircular.duration;
+
       // No need to animate it if the values are the same
       if (animateTo === animateFrom) {
         path.attr('d', getSvgArc(animateTo, diameter, pathDiameter, rotation));
       } else {
-        (function animation() {
-          var currentTime = $window.Math.min(new $window.Date() - startTime, animationDuration);
+        lastDrawFrame = rAF(function animation(now) {
+          var currentTime = $window.Math.max(0, $window.Math.min((now || $mdUtil.now()) - startTime, animationDuration));
 
           path.attr('d', getSvgArc(
             ease(currentTime, animateFrom, changeInValue, animationDuration),
@@ -168,10 +218,11 @@ function MdProgressCircularDirective($$rAF, $window, $mdProgressCircular, $inter
             rotation
           ));
 
+          // Do not allow overlapping animations
           if (id === lastAnimationId && currentTime < animationDuration) {
-            $$rAF(animation);
+            lastDrawFrame = rAF(animation);
           }
-        })();
+        });
       }
     }
 
@@ -193,7 +244,25 @@ function MdProgressCircularDirective($$rAF, $window, $mdProgressCircular, $inter
       endIndeterminate = -temp;
     }
 
-    function cleanupIndeterminate() {
+    function startIndeterminateAnimation() {
+      if (!interval) {
+        // Note that this interval isn't supposed to trigger a digest.
+        interval = $interval(
+          animateIndeterminate,
+          $mdProgressCircular.durationIndeterminate + 50,
+          0,
+          false
+        );
+
+        animateIndeterminate();
+
+        element
+          .addClass(INDETERMINATE_CLASS)
+          .removeAttr('aria-valuenow');
+      }
+    }
+
+    function cleanupIndeterminateAnimation() {
       if (interval) {
         $interval.cancel(interval);
         interval = null;
@@ -279,5 +348,13 @@ function MdProgressCircularDirective($$rAF, $window, $mdProgressCircular, $inter
     }
 
     return defaultValue;
+  }
+
+  /**
+   * Determines the circle's stroke width, based on
+   * the provided diameter.
+   */
+  function getStroke(diameter) {
+    return $mdProgressCircular.strokeWidth / 100 * diameter;
   }
 }
